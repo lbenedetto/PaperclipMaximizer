@@ -1,3 +1,6 @@
+#consoleDiv{
+    display: none !important;
+}
 #mobile
 {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", 'Open Sans', sans-serif;
@@ -80,26 +83,6 @@
   font-weight: 700;
   color: black;
 }
-
-@media only screen and (max-width: 700px)
-{
-  body 
-  {
-    margin: 0;
-    padding: 0;
-  }
-
-  #mobile 
-  {
-    display: block;
-  }
-
-  #page 
-  {
-    display: none;
-  }
-}
-
 
 /* ############# MOBILE TAKEOVER ############## */
 
