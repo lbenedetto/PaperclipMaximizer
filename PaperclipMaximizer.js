@@ -11,6 +11,8 @@ var generation = 0;
 var startOps = 1000;
 var ops = startOps;
 var game, actions, numInputs, genetics;
+var lastAction = 0;
+var lastGameState = 0;
 var k = 0;
 var networks = [];
 function run() {
@@ -97,8 +99,9 @@ function work() {
 		setTimeout(work, clickRate)
 	} else if (ops <= 0) {//Done with current network
 		var score = toInt(select("#clips")) + toInt(select("#funds"));
+		console.log("Generation #" + generation + ", Net #" + k);
 		if (score >= highscore) {
-			console.log("Generation " + generation + "." + k + " achieved new highscore of " + score);
+			console.log("Achieved highscore of " + score);
 			highscore = score;
 		}
 		genetics.population[k].fitness = score;
@@ -113,6 +116,7 @@ function work() {
 		ops--;
 		//Pass game board array into the run function
 		var chosenAction = scaleOutput(networks[k].run(getGameState()));
+		lastAction = chosenAction;
 		console.log(chosenAction);
 		if(isFirstAction){
 			isFirstAction = false;
@@ -127,7 +131,8 @@ function scaleOutput(output){
 }
 
 function getGameState() {
-	return [
+	var gameState = [
+		lastAction,
 		toInt(select("#clips")),
 		toInt(select("#funds")),
 		toInt(select("#unsoldClips")),
@@ -165,6 +170,10 @@ function getGameState() {
 		// toInt(select("#yomiDisplay").innerHTML),
 		// toInt(select("#newTourneyCost").innerHTML),
 	];
+	var temp = gameState;
+	gameState.push((lastGameState === gameState) * 1);
+	lastGameState = temp;
+	return gameState;
 }
 
 function getQCompDisplay () {
