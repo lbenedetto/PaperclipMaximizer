@@ -31,7 +31,7 @@ var timer = setInterval(function () {
 		k++;
 		networks[k].importWeights(genetics.population[k].weights);
 		ops = 5000;
-		resetGame();
+		$("#game")[0].contentWindow.reset();
 	} else {//Run current network
 		ops--;
 		//Pass game board array into the run function
@@ -40,10 +40,6 @@ var timer = setInterval(function () {
 	}
 
 });
-
-function resetGame() {
-	//Reset all game variables to give the next network a try
-}
 
 function fitness() {
 	//Get the fitness of the current game state
