@@ -28,26 +28,34 @@ for (var i = 0; i < popSize; i++) {
 // Next we need to create the Genetics object that will evolve the networks for us
 var genetics = new Brainwave.Genetics(popSize, networks[0].getNumWeights());
 
-var callbackNum = 0;
+var callbackNum = -1;
 var generation = 0;
-setTimeout(mainLoop, 3000);
+mainLoop();
 
-function mainLoop(){
-	if(generation < numGenerations) {
-		if (callbackNum === popSize) {//Population is done, move to next gen
-			callbackNum = 0;
+function mainLoop() {
+	if (generation < numGenerations) {
+		if (callbackNum === popSize - 1) {//Population is done, move to next gen
+			callbackNum = -1;
 			genetics.epoch(genetics.population);
 			generation++;
 		}
-		if (callbackNum === 0) {
-			setTimeout(doGeneration(), 3000);
+		if (callbackNum === -1) {
+			if (generation > 0) {
+				for (var k = 0; k < popSize; k++) {
+					$("#game" + k)[0].contentWindow.reset();
+				}
+			}
+			callbackNum = 0;
+			setTimeout(doGeneration, 5000);
+		} else {
+			callbackNum++;
 		}
-		callbackNum++;
-	}else{
+	} else {
 		done();
 	}
 }
-function doGeneration(){
+
+function doGeneration() {
 	importWeights();
 	// Now the networks and genetics are all set up training can begin. Pass each network an input and issue
 	// it a fitness depending on how close its output was to the desired output
@@ -56,13 +64,14 @@ function doGeneration(){
 	}
 }
 
-function importWeights(){
+function importWeights() {
 	// When creating the genetics object it will also generate random weights an baises for the networks
 	// These should be imported into the population of networks before beginning any training
 	for (var j = 0; j < popSize; j++) {
 		networks[j].importWeights(genetics.population[j].weights);
 	}
 }
+
 function done() {
 	//Done with all generations
 	//Save best network
@@ -85,7 +94,6 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	var lastFitness = 0;
 	var actions, numOutputs;
 	var context = $(target);
-	var game = context[0].contentWindow;
 	actions = [
 		function () {
 			select("#btnMakePaperclip").click()
@@ -159,7 +167,6 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 				console.log("Achieved score of " + score);
 			}
 			pop.fitness = score;
-			game.reset();
 			callback();
 		} else {//Run current network
 			ops--;
@@ -175,8 +182,8 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	function chooseAction(output) {
 		var max = 0;
 		var maxIX = 0;
-		for(var i = 0; i < numOutputs; i++){
-			if(output[i] > max){
+		for (var i = 0; i < numOutputs; i++) {
+			if (output[i] > max) {
 				maxIX = i;
 				max = output[i];
 			}
