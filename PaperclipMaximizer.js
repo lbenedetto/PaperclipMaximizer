@@ -11,8 +11,8 @@ var actionNames = [
 //5 minutes per sim = 300 seconds
 //5000 ops per sim = 16 ops per second
 //20 population, 100 generations
-var startOps = 5000;
-var popSize = 6;
+var startOps = 1000;
+var popSize = 20;
 var numGenerations = 1000;
 var clickRate = 62; //click once ever x ms
 var highscore = 0;
@@ -30,12 +30,12 @@ var genetics = new Brainwave.Genetics(popSize, networks[0].getNumWeights());
 
 var callbackNum = 0;
 var generation = 0;
-setTimeout(mainLoop, 5000);
+setTimeout(mainLoop, 2000);
 
 function mainLoop(){
 	if(generation < numGenerations) {
 		if (callbackNum === popSize) {//Population is done, move to next gen
-			//callbackNum = 0;
+			callbackNum = 0;
 			genetics.epoch(genetics.population);
 			generation++;
 		}
@@ -158,7 +158,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 				console.log("Achieved score of " + score);
 			}
 			pop.fitness = score;
-			//game.reset();
+			game.reset();
 			callback();
 		} else {//Run current network
 			ops--;
@@ -166,9 +166,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			var chosenAction = scaleOutput(net.run(getGameState()));
 			lastAction = chosenAction;
 			console.log("Generation #" + generation + ", Net #" + id + ": (" + chosenAction + ") " + actionNames[chosenAction]);
-			if (numTimesNotChanged >= 50) {//Network is stuck, kill it
-				ops = 0;
-			}
+			console.log(ops);
 			actions[chosenAction]();
 			setTimeout(work, clickRate)
 		}
@@ -234,7 +232,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	}
 
 	function select(target) {
-		return context.contents().find(target);
+		return context.contents().find(target)[0];
 	}
 
 	function getQCompDisplay() {
