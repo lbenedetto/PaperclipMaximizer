@@ -11,7 +11,7 @@ var actionNames = [
 //5 minutes per sim = 300 seconds
 //5000 ops per sim = 16 ops per second
 //20 population, 100 generations
-var startOps = 1000;
+var startOps = 2000;
 var popSize = 20;
 var numGenerations = 1000;
 var clickRate = 62; //click once ever x ms
