@@ -30,7 +30,7 @@ var genetics = new Brainwave.Genetics(popSize, networks[0].getNumWeights());
 
 var callbackNum = 0;
 var generation = 0;
-setTimeout(mainLoop, 2000);
+setTimeout(mainLoop, 3000);
 
 function mainLoop(){
 	if(generation < numGenerations) {
@@ -159,14 +159,13 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			}
 			pop.fitness = score;
 			game.reset();
-			callback();
+			setTimeout(callback(), 2000);
 		} else {//Run current network
 			ops--;
 			//Pass game board array into the run function
 			var chosenAction = scaleOutput(net.run(getGameState()));
 			lastAction = chosenAction;
-			console.log("Generation #" + generation + ", Net #" + id + ": (" + chosenAction + ") " + actionNames[chosenAction]);
-			console.log(ops);
+			//console.log("Op #" + ops + ", Gen #" + generation + ", Sim #" + id + ": (" + chosenAction + ") " + actionNames[chosenAction]);
 			actions[chosenAction]();
 			setTimeout(work, clickRate)
 		}
