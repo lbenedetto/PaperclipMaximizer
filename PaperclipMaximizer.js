@@ -23,7 +23,7 @@ numInputs = 14;
 
 //Network(numInputs, numOutputs, numHiddenLayers, numNeuronsPerHiddenLayer);
 for (var i = 0; i < popSize; i++) {
-	networks.push(new Brainwave.Network(numInputs, 1, 3, numInputs));
+	networks.push(new Brainwave.Network(numInputs, 7, 3, numInputs));
 }
 // Next we need to create the Genetics object that will evolve the networks for us
 var genetics = new Brainwave.Genetics(popSize, networks[0].getNumWeights());
@@ -40,7 +40,7 @@ function mainLoop(){
 			generation++;
 		}
 		if (callbackNum === 0) {
-			doGeneration();
+			setTimeout(doGeneration(), 3000);
 		}
 		callbackNum++;
 	}else{
@@ -103,7 +103,8 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			select("#btnBuyWire").click()
 		},
 		function () {
-			select("#btnMakeClipper").click()
+			select("#btnMakeClipper").click();
+			pop.fitness += .1;
 		},
 		function () {
 			select("#btnMakeMegaClipper").click()
@@ -159,11 +160,11 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			}
 			pop.fitness = score;
 			game.reset();
-			setTimeout(callback(), 2000);
+			callback();
 		} else {//Run current network
 			ops--;
 			//Pass game board array into the run function
-			var chosenAction = scaleOutput(net.run(getGameState()));
+			var chosenAction = chooseAction(net.run(getGameState()));
 			lastAction = chosenAction;
 			//console.log("Op #" + ops + ", Gen #" + generation + ", Sim #" + id + ": (" + chosenAction + ") " + actionNames[chosenAction]);
 			actions[chosenAction]();
@@ -171,8 +172,16 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 		}
 	}
 
-	function scaleOutput(output) {
-		return Math.floor(output[0] * numOutputs);
+	function chooseAction(output) {
+		var max = 0;
+		var maxIX = 0;
+		for(var i = 0; i < numOutputs; i++){
+			if(output[i] > max){
+				maxIX = i;
+				max = output[i];
+			}
+		}
+		return maxIX;
 	}
 
 	function getGameState() {
