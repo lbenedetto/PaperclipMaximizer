@@ -12,7 +12,7 @@ var actionNames = [
 //5000 ops per sim = 16 ops per second
 //20 population, 100 generations
 var startOps = 2000;
-var popSize = 20;
+var popSize = 24;
 var numGenerations = 1000;
 var clickRate = 62; //click once ever x ms
 var highscore = 0;
@@ -23,7 +23,7 @@ numInputs = 14;
 
 //Network(numInputs, numOutputs, numHiddenLayers, numNeuronsPerHiddenLayer);
 for (var i = 0; i < popSize; i++) {
-	networks.push(new Brainwave.Network(numInputs, 7, 3, numInputs));
+	networks.push(new Brainwave.Network(numInputs, 7, 20, numInputs));
 }
 // Next we need to create the Genetics object that will evolve the networks for us
 var genetics = new Brainwave.Genetics(popSize, networks[0].getNumWeights());
@@ -57,6 +57,7 @@ function mainLoop() {
 
 function doGeneration() {
 	importWeights();
+	console.log("===== Current Highscore ===== : " + highscore);
 	// Now the networks and genetics are all set up training can begin. Pass each network an input and issue
 	// it a fitness depending on how close its output was to the desired output
 	for (var k = 0; k < popSize; k++) {
@@ -90,8 +91,6 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	maximizers[id] = this;
 	var ops = startOps;
 	var lastAction = 0;
-	var numTimesNotChanged = 0;
-	var lastFitness = 0;
 	var actions, numOutputs;
 	var context = $(target);
 	actions = [
@@ -112,7 +111,6 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 		},
 		function () {
 			select("#btnMakeClipper").click();
-			pop.fitness += .1;
 		},
 		function () {
 			select("#btnMakeMegaClipper").click()
@@ -154,7 +152,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 		//TODO: add the rest of the project buttons
 	];
 	numOutputs = actions.length;
-	setTimeout(work, clickRate);
+	var repeatingTask = setInterval(work, clickRate);
 
 	function work() {
 		if (ops <= 0) {//Done with current network
@@ -167,6 +165,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 				console.log("Achieved score of " + score);
 			}
 			pop.fitness = score;
+			clearInterval(repeatingTask);
 			callback();
 		} else {//Run current network
 			ops--;
@@ -175,7 +174,6 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			lastAction = chosenAction;
 			//console.log("Op #" + ops + ", Gen #" + generation + ", Sim #" + id + ": (" + chosenAction + ") " + actionNames[chosenAction]);
 			actions[chosenAction]();
-			setTimeout(work, clickRate)
 		}
 	}
 
@@ -192,21 +190,22 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	}
 
 	function getGameState() {
-		var gameState = [
-			lastAction,
-			toInt(select("#clips")),
+		return [
 			toInt(select("#funds")),
 			toInt(select("#unsoldClips")),
-			toInt(select("#avgRev")),
-			toInt(select("#avgSales")),
-			toInt(select("#adCost")),
+			toInt(select("#adCost")),//Cost of upgrading marketing
 			toInt(select("#margin")),//Price per clip
+			toInt(select("#avgSales")),//Clips sold per second
+			toInt(select("#clipmakerRate")),//Clips made per second
 			toInt(select("#wire")),
 			toInt(select("#wireCost")),
-			toInt(select("#clipmakerLevel2")),
-			toInt(select("#megaClipperLevel")),
 			toInt(select("#clipperCost")),
-			toInt(select("#megaClipperCost"))
+			toInt(select("#megaClipperCost")),
+			//Some booleans for if buttons can be clicked
+			select("#btnLowerPrice").disabled * 1,
+			select("#btnExpandMarketing").disabled* 1,
+			select("#btnBuyWire").disabled * 1,
+			select("#btnMakeClipper").disabled * 1
 			// toInt(select("#trust")),
 			// toInt(select("#nextTrust")),
 			// toInt(select("#processors")),
@@ -232,11 +231,6 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			// toInt(select("#yomiDisplay").innerHTML),
 			// toInt(select("#newTourneyCost").innerHTML),
 		];
-
-		var curFitness = fitness();
-		numTimesNotChanged = (lastFitness === curFitness) ? numTimesNotChanged + 1 : 0;
-		lastFitness = curFitness;
-		return gameState;
 	}
 
 	function fitness() {
