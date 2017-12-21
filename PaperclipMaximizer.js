@@ -1,13 +1,5 @@
 var maximizers = [];
-var actionNames = [
-	"Make Paperclip",
-	"Lower Price",
-	"Raise Price",
-	"Expand Marketing",
-	"Buy Wire",
-	"Make Clipper",
-	"Make Mega Clipper"
-];
+
 //5 minutes per sim = 300 seconds
 //5000 ops per sim = 16 ops per second
 //20 population, 100 generations
@@ -19,7 +11,7 @@ var highscore = 0;
 // Create an array to hold the population of networks
 var networks = [];
 // Populate the networks array
-numInputs = 14;
+numInputs = 13;
 
 //Network(numInputs, numOutputs, numHiddenLayers, numNeuronsPerHiddenLayer);
 for (var i = 0; i < popSize; i++) {
@@ -46,7 +38,7 @@ function mainLoop() {
 				}
 			}
 			callbackNum = 0;
-			setTimeout(doGeneration, 5000);
+			setTimeout(doGeneration, 5000);//Wait for resets to finish
 		} else {
 			callbackNum++;
 		}
@@ -93,27 +85,28 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	var lastAction = 0;
 	var actions, numOutputs;
 	var context = $(target);
+	var game = loadGame();
 	actions = [
 		function () {
-			select("#btnMakePaperclip").click()
+			game["btnLowerPrice"].click();
 		},
 		function () {
-			select("#btnLowerPrice").click()
+			game["btnRaisePrice"].click();
 		},
 		function () {
-			select("#btnRaisePrice").click()
+			game["btnExpandMarketing"].click();
 		},
 		function () {
-			select("#btnExpandMarketing").click()
+			game["btnBuyWire"].click();
 		},
 		function () {
-			select("#btnBuyWire").click()
+			game["btnMakeClipper"].click();
 		},
 		function () {
-			select("#btnMakeClipper").click();
+			game["btnMakeMegaClipper"].click();
 		},
-		function () {
-			select("#btnMakeMegaClipper").click()
+		function (){
+			//No Op
 		}
 		// function () { select("#btnAddProc").click() },
 		// function () { select("#btnAddMem").click() },
@@ -152,6 +145,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 		//TODO: add the rest of the project buttons
 	];
 	numOutputs = actions.length;
+	pop.fitness = 0;
 	var repeatingTask = setInterval(work, clickRate);
 
 	function work() {
@@ -164,7 +158,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			} else {
 				console.log("Achieved score of " + score);
 			}
-			pop.fitness = score;
+			pop.fitness += score;
 			clearInterval(repeatingTask);
 			callback();
 		} else {//Run current network
@@ -174,6 +168,7 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 			lastAction = chosenAction;
 			//console.log("Op #" + ops + ", Gen #" + generation + ", Sim #" + id + ": (" + chosenAction + ") " + actionNames[chosenAction]);
 			actions[chosenAction]();
+			game["btnMakePaperclip"].click();
 		}
 	}
 
@@ -189,40 +184,83 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 		return maxIX;
 	}
 
-	function getGameState() {
-		return [
-			toInt(select("#funds")),
-			toInt(select("#unsoldClips")),
-			toInt(select("#adCost")),//Cost of upgrading marketing
-			toInt(select("#margin")),//Price per clip
-			toInt(select("#avgSales")),//Clips sold per second
-			toInt(select("#clipmakerRate")),//Clips made per second
-			toInt(select("#wire")),
-			toInt(select("#wireCost")),
-			toInt(select("#clipperCost")),
-			toInt(select("#megaClipperCost")),
-			//Some booleans for if buttons can be clicked
-			select("#btnLowerPrice").disabled * 1,
-			select("#btnExpandMarketing").disabled* 1,
-			select("#btnBuyWire").disabled * 1,
-			select("#btnMakeClipper").disabled * 1
+	function loadGame() {
+		return {
+			"funds": select("#funds"),
+			"margin": select("#margin"),//Price per clip
+			"clipRate": select("#clipmakerRate"),
+			"avgSales": select("#avgSales"),
+			"wire": select("#wire"),
+			"adCost": select("#adCost"),
+			"wireCost": select("#wireCost"),
+			"clipperCost": select("#clipperCost"),
+			"megaClipperCost": select("#megaClipperCost"),
+			//buttons
+			"btnMakePaperclip": select("#btnMakePaperclip"),
+			"btnLowerPrice": select("#btnLowerPrice"),
+			"btnRaisePrice": select("#btnRaisePrice"),
+			"btnExpandMarketing": select("#btnExpandMarketing"),
+			"btnBuyWire": select("#btnBuyWire"),
+			"btnMakeClipper": select("#btnMakeClipper"),
+			"btnMakeMegaClipper": select("#btnMakeMegaClipper")
 			// toInt(select("#trust")),
 			// toInt(select("#nextTrust")),
 			// toInt(select("#processors")),
 			// toInt(select("#memory")),
 			// toInt(select("#operations")),
 			// toInt(select("#creativity")),
-			// getQChipValue("#qChip0"),
-			// getQChipValue("#qChip1"),
-			// getQChipValue("#qChip2"),
-			// getQChipValue("#qChip3"),
-			// getQChipValue("#qChip4"),
-			// getQChipValue("#qChip5"),
-			// getQChipValue("#qChip6"),
-			// getQChipValue("#qChip7"),
-			// getQChipValue("#qChip8"),
+			// getQChipValue("#qChip0") +
+			// getQChipValue("#qChip1") +
+			// getQChipValue("#qChip2") +
+			// getQChipValue("#qChip3") +
+			// getQChipValue("#qChip4") +
+			// getQChipValue("#qChip5") +
+			// getQChipValue("#qChip6") +
+			// getQChipValue("#qChip7") +
+			// getQChipValue("#qChip8") +
 			// getQChipValue("#qChip9"),
-			// getQCompDisplay(),
+			// toInt(select("#investmentBankroll").innerHTML),
+			// toInt(select("#secValue").innerHTML),
+			// toInt(select("#portValue").innerHTML),
+			// toInt(select("#investmentLevel").innerHTML),
+			// toInt(select("#investUpgradeCost").innerHTML),
+			// toInt(select("#yomiDisplay").innerHTML),
+			// toInt(select("#newTourneyCost").innerHTML),
+		};
+	}
+
+	function getGameState() {
+		return [
+			toInt(game["funds"]),
+			toInt(game["margin"]),//Price per clip
+			toInt(game["clipmakerRate"]) - toInt(game["avgSales"]), //Net number of clips per second
+			(toInt(game["wire"]) === 0) * 1, //Did we run out of wire?
+			toInt(game["adCost"]),
+			toInt(game["wireCost"]),
+			toInt(game["clipperCost"]),
+			toInt(game["megaClipperCost"]),
+			//Some booleans for if buttons can be clicked
+			game["btnLowerPrice"].disabled * 1,
+			game["btnExpandMarketing"].disabled * 1,
+			game["btnBuyWire"].disabled * 1,
+			game["btnMakeClipper"].disabled * 1,
+			game["btnMakeMegaClipper"].disabled * 1
+			// toInt(select("#trust")),
+			// toInt(select("#nextTrust")),
+			// toInt(select("#processors")),
+			// toInt(select("#memory")),
+			// toInt(select("#operations")),
+			// toInt(select("#creativity")),
+			// getQChipValue("#qChip0") +
+			// getQChipValue("#qChip1") +
+			// getQChipValue("#qChip2") +
+			// getQChipValue("#qChip3") +
+			// getQChipValue("#qChip4") +
+			// getQChipValue("#qChip5") +
+			// getQChipValue("#qChip6") +
+			// getQChipValue("#qChip7") +
+			// getQChipValue("#qChip8") +
+			// getQChipValue("#qChip9"),
 			// toInt(select("#investmentBankroll").innerHTML),
 			// toInt(select("#secValue").innerHTML),
 			// toInt(select("#portValue").innerHTML),
@@ -236,17 +274,12 @@ function PaperclipMaximizer(target, id, callback, net, pop) {
 	function fitness() {
 		//TODO: Better fitness function
 		return toInt(select("#clips"))
-			+ (toInt(select("#funds")) / 10)
+			//+ (toInt(select("#funds")) / 10)
 			- (toInt(select("#unsoldClips")) / 2);
 	}
 
 	function select(target) {
 		return context.contents().find(target)[0];
-	}
-
-	function getQCompDisplay() {
-		var val = parseInt(select("#qCompDisplay").innerHTML.replace("qOps: ", ""));
-		if (isNaN(val)) return 0;
 	}
 
 	function getQChipValue(target) {
